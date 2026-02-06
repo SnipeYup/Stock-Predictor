@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Stock Prediction MVP</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#0f172a;color:#e2e8f0;padding:24px}
+    .box{background:#1e293b;padding:14px;border-radius:12px;margin-bottom:14px}
+    input,button,select{padding:8px;border-radius:8px;border:1px solid #475569;background:#0b1220;color:#e2e8f0}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid #334155;text-align:left}
+    pre{white-space:pre-wrap}
+  </style>
+</head>
+<body>
+  <h1>Global AI Stock Predictions (MVP)</h1>
+  <div class="box">
+    <input id="q" placeholder="Search ticker or company" />
+    <button onclick="searchStock()">Search/Add</button>
+    <select id="sort" onchange="loadStocks()">
+      <option value="ticker">Sort ticker</option>
+      <option value="predicted">Sort predicted</option>
+      <option value="confidence">Sort confidence</option>
+    </select>
+  </div>
+  <div class="box">
+    <table><thead><tr><th>Ticker</th><th>Name</th><th>Prediction (days)</th><th>Confidence</th><th></th></tr></thead><tbody id="rows"></tbody></table>
+  </div>
+  <div class="box"><pre id="detail">Pick a stock to inspect detail.</pre></div>
+<script>
+async function j(path, opts={}){const r=await fetch(path, opts);return r.json();}
+async function loadStocks(){
+  const sort=document.getElementById('sort').value;
+  const data=await j('/stocks?sort_by='+sort);
+  const el=document.getElementById('rows'); el.innerHTML='';
+  data.forEach(s=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${s.ticker}</td><td>${s.name}</td><td>${Number(s.predicted).toFixed(2)}%</td><td>${Number(s.confidence).toFixed(2)}%</td><td><button onclick="detail('${s.ticker}')">Detail</button></td>`;
+    el.appendChild(tr);
+  })
+}
+async function searchStock(){
+  const q=document.getElementById('q').value;
+  await j('/search?query='+encodeURIComponent(q));
+  loadStocks();
+}
+async function detail(t){
+  await j('/predict/'+t+'?timeframe=days', {method:'POST'});
+  const d=await j('/stocks/'+t+'?timeframe=days');
+  document.getElementById('detail').textContent=JSON.stringify(d,null,2);
+}
+loadStocks();
+setInterval(loadStocks,30000);
+</script>
+</body>
+</html>
