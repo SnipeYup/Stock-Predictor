@@ -13,8 +13,19 @@ A runnable MVP of a news-driven stock prediction web app built with Python stand
 - Browser UI for list/search/detail workflows.
 
 ## Run
+### macOS / Linux
 ```bash
-PYTHONPATH=src python run.py
+python run.py
+```
+
+### Windows PowerShell
+```powershell
+python run.py
+```
+
+### Windows CMD
+```cmd
+python run.py
 ```
 
 Then open `http://127.0.0.1:8000`.
